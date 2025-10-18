@@ -11,12 +11,21 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// ----- CORS Setup -----
+const corsOptions = {
+  origin: "https://labidkhan.netlify.app", // your frontend
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true, // if you need cookies or auth headers
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // handle preflight requests
+
+// ----- Middleware -----
 app.use(express.json());
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-// MongoDB setup
+// ----- MongoDB Setup -----
 const MONGODB_URI = process.env.MONGODB_URI;
 
 let cachedDb = null;
@@ -35,15 +44,16 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Routes
+// ----- Routes -----
 app.use("/api/photos", photoRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/lifestyle", lifestyleRoutes);
 
-// 404
+// ----- 404 Handler -----
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
+// ----- Export for Vercel Serverless -----
 export default app;
 
