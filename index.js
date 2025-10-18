@@ -49,6 +49,7 @@ export default app;*/}
 
 
 
+
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -62,10 +63,10 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Fixed CORS setup
+// ✅ CORS setup: allow your frontend URLs
 const allowedOrigins = [
-  "https://labidkhan.netlify.app", // your Netlify frontend
-  "http://localhost:5173"          // for local development
+  "https://labidkhan.netlify.app", // Netlify frontend
+  "http://localhost:5173",          // local dev
 ];
 
 app.use(
@@ -83,11 +84,12 @@ app.use(
 
 // Middleware
 app.use(express.json());
+
+// Serve uploads folder
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // MongoDB setup
 const MONGODB_URI = process.env.MONGODB_URI;
-
 let cachedDb = null;
 const connectDb = async () => {
   if (cachedDb) return cachedDb;
@@ -109,11 +111,16 @@ app.use("/api/photos", photoRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/lifestyle", lifestyleRoutes);
 
-// 404
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
+// Vercel expects export default
 export default app;
 
-
+// Optional: for local testing
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
