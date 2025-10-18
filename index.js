@@ -54,6 +54,11 @@ app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
+app.get("/api/test", (req, res) => {
+  res.json({ message: "Backend is working!" });
+});
+
+
 // ----- Export for Vercel Serverless -----
 export default app;
 
