@@ -66,24 +66,70 @@ export default app;*/}
 
 
 import express from "express";
-import serverless from "serverless-http";
+import serverless from "serverless-http"; // needed for Vercel
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { MongoClient } from "mongodb";
+
+// Routes
+import photoRoutes from "./routes/photoRoutes.js";
+import videoRoutes from "./routes/videoRoutes.js";
+import lifestyleRoutes from "./routes/lifestyleRoutes.js";
 
 dotenv.config();
 
 const app = express();
 
-// CORS
-app.use(cors({ origin: "https://labidkhan.netlify.app" }));
+// ----- CORS -----
+app.use(
+  cors({
+    origin: "https://labidkhan.netlify.app", // your frontend
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+  })
+);
+app.options("*", cors());
+
+// ----- Middleware -----
 app.use(express.json());
 
-// Test route
+// ----- Static uploads (for local testing) -----
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+// ----- MongoDB Setup -----
+let cachedDb = null;
+
+const connectDb = async () => {
+  if (cachedDb) return cachedDb;
+
+  const client = new MongoClient(process.env.MONGODB_URI);
+  await client.connect();
+  cachedDb = client.db("mediaDB");
+  console.log("✅ MongoDB connected");
+  return cachedDb;
+};
+
+// Inject DB into request
+app.use(async (req, res, next) => {
+  req.db = await connectDb();
+  next();
+});
+
+// ----- Routes -----
+app.use("/api/photos", photoRoutes);
+app.use("/api/videos", videoRoutes);
+app.use("/api/lifestyle", lifestyleRoutes);
+
+// ----- Test route -----
 app.get("/api/test", (req, res) => {
   res.json({ message: "Backend is working!" });
 });
 
-// Export serverless function
+// ----- 404 handler -----
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
+
+// ----- Export serverless function for Vercel -----
 export default serverless(app);
-
-
