@@ -64,15 +64,15 @@ export default app;*/}
 
 
 
-
+// index.js
 import express from "express";
-import serverless from "serverless-http"; // needed for Vercel
+import serverless from "serverless-http";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import { MongoClient } from "mongodb";
 
-// Routes
+// Import routes
 import photoRoutes from "./routes/photoRoutes.js";
 import videoRoutes from "./routes/videoRoutes.js";
 import lifestyleRoutes from "./routes/lifestyleRoutes.js";
@@ -84,7 +84,7 @@ const app = express();
 // ----- CORS -----
 app.use(
   cors({
-    origin: "https://labidkhan.netlify.app", // your frontend
+    origin: "https://labidkhan.netlify.app", // your frontend domain
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
@@ -94,7 +94,7 @@ app.options("*", cors());
 // ----- Middleware -----
 app.use(express.json());
 
-// ----- Static uploads (for local testing) -----
+// ----- Static uploads (for local testing only) -----
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // ----- MongoDB Setup -----
@@ -103,17 +103,26 @@ let cachedDb = null;
 const connectDb = async () => {
   if (cachedDb) return cachedDb;
 
-  const client = new MongoClient(process.env.MONGODB_URI);
-  await client.connect();
-  cachedDb = client.db("mediaDB");
-  console.log("✅ MongoDB connected");
-  return cachedDb;
+  try {
+    const client = new MongoClient(process.env.MONGODB_URI);
+    await client.connect();
+    cachedDb = client.db("mediaDB"); // your database name
+    console.log("✅ MongoDB connected");
+    return cachedDb;
+  } catch (err) {
+    console.error("MongoDB connection failed:", err);
+    throw err;
+  }
 };
 
 // Inject DB into request
 app.use(async (req, res, next) => {
-  req.db = await connectDb();
-  next();
+  try {
+    req.db = await connectDb();
+    next();
+  } catch (err) {
+    res.status(500).json({ message: "Database connection error" });
+  }
 });
 
 // ----- Routes -----
