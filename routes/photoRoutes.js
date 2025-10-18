@@ -2,7 +2,9 @@ import express from "express";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
-import { getPhotoCollection } from "../models/Photo.js";
+
+import { getPhotoCollection } from "./models/Photo.js";
+
 import { ObjectId } from "mongodb";
 
 const router = express.Router();
