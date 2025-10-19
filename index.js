@@ -478,7 +478,7 @@ app.use("/api/lifestyle", lifestyleRoutes);
 
 // Root
 app.get("/", (req, res) => {
-  res.send("Backend running on Vercel with MongoDB & Cloudinary!");
+  res.send("Backend running on Vercel with MongoDB & Cloudinary Perfectly!");
 });
 
 export default app;
