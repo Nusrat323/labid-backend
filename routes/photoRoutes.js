@@ -85,7 +85,7 @@ export default router;*/}
 import express from "express";
 import multer from "multer";
 import { ObjectId } from "mongodb";
-import { getPhotoCollection } from "../models/Photos.js";
+import { getPhotoCollection } from "../models/Photo.js";
 import { uploadToCloudinary } from "../index.js";
 
 const router = express.Router();
