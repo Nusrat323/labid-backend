@@ -145,8 +145,8 @@ export default serverless(app);*/}
 
 
 
-// index.js
-import express from "express";
+// index.js cloudinary 
+{/*import express from "express";
 import serverless from "serverless-http";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -367,5 +367,49 @@ app.use((req, res) => {
 });
 
 // ----- Export serverless function -----
-export default serverless(app);
+export default serverless(app);*/}
+
+
+
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import { MongoClient } from "mongodb";
+
+dotenv.config({ path: "./.env" }); // make sure it reads your local .env
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// ✅ MongoDB connection
+let db;
+
+const connectDB = async () => {
+  try {
+    // Use your variable name from .env (MONGODB_URI)
+    const client = new MongoClient(process.env.MONGODB_URI);
+    await client.connect();
+    db = client.db(process.env.DB_NAME || "mediaDB");
+    console.log("✅ MongoDB connected successfully");
+  } catch (err) {
+    console.error("❌ MongoDB connection failed:", err);
+  }
+};
+
+connectDB();
+
+// ✅ Example route
+app.get("/", (req, res) => {
+  res.send("Backend running on Vercel using native MongoDB!");
+});
+
+// ✅ Export app for Vercel (no app.listen)
+export default app;
+
+
+
+
+
+
 
