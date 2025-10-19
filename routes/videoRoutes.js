@@ -95,7 +95,7 @@ export default router;*/}
 import express from "express";
 import multer from "multer";
 import { ObjectId } from "mongodb";
-import { getVideoCollection } from "../models/Video.js";
+import { getVideoCollection } from "../models/Videos.js";
 import { uploadToCloudinary } from "../index.js";
 
 const router = express.Router();
