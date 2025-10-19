@@ -1,4 +1,4 @@
-{/*import express from "express";
+import express from "express";
 import multer from "multer";
 import { ObjectId } from "mongodb";
 import { getVideoCollection } from "../models/Video.js";
@@ -80,74 +80,8 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-export default router;*/}
-
-
-
-
-
-import express from "express";
-import { ObjectId } from "mongodb";
-import { getVideoCollection } from "../models/Video.js";
-import { cloudinary } from "../index.js";
-
-const router = express.Router();
-
-// Save metadata after frontend upload
-router.post("/metadata", async (req, res) => {
-  try {
-    const db = req.db;
-    const videos = getVideoCollection(db);
-    const { url, public_id, thumbnailUrl, thumbnail_public_id, category } = req.body;
-    if (!url || !public_id) return res.status(400).json({ message: "Video URL & public_id required" });
-
-    const newVideo = {
-      url,
-      public_id,
-      thumbnailUrl: thumbnailUrl || null,
-      thumbnail_public_id: thumbnail_public_id || null,
-      category: category || "Uncategorized",
-      createdAt: new Date(),
-    };
-
-    const dbResult = await videos.insertOne(newVideo);
-    res.status(201).json({ ...newVideo, _id: dbResult.insertedId });
-  } catch (err) {
-    console.error("Video metadata save failed:", err);
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Get all videos
-router.get("/", async (req, res) => {
-  try {
-    const db = req.db;
-    const videos = getVideoCollection(db);
-    const all = await videos.find().sort({ createdAt: -1 }).toArray();
-    res.json(all);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Delete video
-router.delete("/:id", async (req, res) => {
-  try {
-    const db = req.db;
-    const videos = getVideoCollection(db);
-    const id = new ObjectId(req.params.id);
-    const video = await videos.findOne({ _id: id });
-    if (!video) return res.status(404).json({ message: "Video not found" });
-
-    if (video.public_id) await cloudinary.uploader.destroy(video.public_id);
-    if (video.thumbnail_public_id) await cloudinary.uploader.destroy(video.thumbnail_public_id);
-
-    await videos.deleteOne({ _id: id });
-    res.json({ message: "Video deleted" });
-  } catch (err) {
-    console.error("Video delete failed:", err);
-    res.status(500).json({ message: err.message });
-  }
-});
-
 export default router;
+
+
+
+
