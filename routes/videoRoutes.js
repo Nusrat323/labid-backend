@@ -89,16 +89,16 @@ export default router;*/}
 import express from "express";
 import { ObjectId } from "mongodb";
 import { getVideoCollection } from "../models/Video.js";
+import { cloudinary } from "../index.js";
 
 const router = express.Router();
 
-// ✅ Save video metadata (after direct upload from frontend)
+// Save metadata after frontend upload
 router.post("/metadata", async (req, res) => {
   try {
     const db = req.db;
     const videos = getVideoCollection(db);
     const { url, public_id, thumbnailUrl, thumbnail_public_id, category } = req.body;
-
     if (!url || !public_id) return res.status(400).json({ message: "Video URL & public_id required" });
 
     const newVideo = {
@@ -118,7 +118,7 @@ router.post("/metadata", async (req, res) => {
   }
 });
 
-// ✅ Get all videos
+// Get all videos
 router.get("/", async (req, res) => {
   try {
     const db = req.db;
@@ -130,8 +130,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ Delete video
-import { cloudinary } from "../index.js";
+// Delete video
 router.delete("/:id", async (req, res) => {
   try {
     const db = req.db;
@@ -152,12 +151,3 @@ router.delete("/:id", async (req, res) => {
 });
 
 export default router;
-
-
-
-
-
-
-
-
-

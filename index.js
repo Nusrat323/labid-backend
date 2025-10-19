@@ -77,7 +77,6 @@ export default app;*/}
 
 
 
-
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -93,7 +92,7 @@ dotenv.config({ path: "./.env" });
 const app = express();
 
 // ✅ CORS: Allow frontend origin
-const allowedOrigins = ["https://labidkhan.netlify.app"]; // your frontend
+const allowedOrigins = ["https://labidkhan.netlify.app"];
 app.use(
   cors({
     origin: allowedOrigins,
@@ -102,9 +101,9 @@ app.use(
   })
 );
 
-// ✅ JSON parsing
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// ✅ Body parsing (support very large uploads)
+app.use(express.json({ limit: "1gb" })); // large video JSON metadata
+app.use(express.urlencoded({ limit: "1gb", extended: true }));
 
 // ✅ MongoDB connection
 let db;
@@ -147,20 +146,17 @@ export const uploadToCloudinary = (buffer, folder = "media") => {
   });
 };
 
-export { cloudinary };
-
 // ✅ Routes
 app.use("/api/videos", videoRoutes);
 app.use("/api/photos", photoRoutes);
 app.use("/api/lifestyle", lifestyleRoutes);
 
-// ✅ Root
-app.get("/", (req, res) => {
-  res.send("Backend running on Vercel with MongoDB & Cloudinary!");
-});
+// ✅ Root endpoint
+app.get("/", (req, res) => res.send("Backend running on Vercel with MongoDB & Cloudinary!"));
 
-// ✅ Export for Vercel
+// ✅ Export for Vercel serverless
 export default app;
+
 
 
 
