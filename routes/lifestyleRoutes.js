@@ -1,4 +1,4 @@
-import express from "express";
+{/*import express from "express";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
@@ -72,5 +72,76 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+export default router;*/}
+
+
+
+
+import express from "express";
+import multer from "multer";
+import { ObjectId } from "mongodb";
+import { getLifestyleCollection } from "../models/Lifestyle.js";
+import { uploadToCloudinary } from "../index.js";
+
+const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
+
+// Upload lifestyle file
+router.post("/upload", upload.single("file"), async (req, res) => {
+  try {
+    const db = req.db;
+    const lifestyle = getLifestyleCollection(db);
+
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
+    const fileUrl = (await uploadToCloudinary(req.file.buffer, "lifestyle")).secure_url;
+
+    const newDoc = {
+      url: fileUrl,
+      category: "Lifestyle",
+      createdAt: new Date(),
+    };
+
+    const result = await lifestyle.insertOne(newDoc);
+    res.status(201).json({ _id: result.insertedId, ...newDoc });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get all lifestyle files
+router.get("/", async (req, res) => {
+  try {
+    const db = req.db;
+    const lifestyle = getLifestyleCollection(db);
+    const all = await lifestyle.find().sort({ createdAt: -1 }).toArray();
+    res.json(all);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Delete lifestyle file
+router.delete("/:id", async (req, res) => {
+  try {
+    const db = req.db;
+    const lifestyle = getLifestyleCollection(db);
+    const id = new ObjectId(req.params.id);
+    const doc = await lifestyle.findOne({ _id: id });
+    if (!doc) return res.status(404).json({ message: "Not found" });
+
+    if (doc.url) await cloudinary.uploader.destroy(doc.url.split("/").pop().split(".")[0]);
+
+    await lifestyle.deleteOne({ _id: id });
+    res.json({ message: "Deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 export default router;
+
 
